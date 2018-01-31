@@ -1,3 +1,10 @@
+# IDE
+.idea
+*.iml
+
+# Project
+*.xlsb
+
 # Logs
 logs
 *.log

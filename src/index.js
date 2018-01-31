@@ -3,22 +3,6 @@ const XLSX = require('xlsx');
  
 const sappData = require('../SAPP-data');
 
-function addSheet(wb, data){
-   
-    var ws_name = "SheetJS";
-
-    /* make worksheet */
-    var ws_data = [
-        [ "S", "h", "e", "e", "t", "J", "S" ],
-        [  1 ,  2 ,  3 ,  4 ,  5 ],
-        [  1 ,  2 ,  3 ,  4 ,  5 ]
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-    /* Add the sheet name to the list */
-
-    XLSX.utils.book_append_sheet(wb, ws, ws_name); 
-}    
 
 function convertMeasures(data) {
    return data.measures.reduce((accRoot,mes) => {
@@ -47,8 +31,14 @@ function convertDataAsSheetAoa(data) {
 }
 function convertWbSheet(data) {
     const lines = convertDataAsSheetAoa(data);
-    console.log(lines);
     const ws = XLSX.utils.aoa_to_sheet(lines);
+    // columns
+    ws["!cols"] = ws["!cols"] || [];
+    [15, 10, 10, 10].forEach((wch, idx)=> {
+        ws["!cols"][idx] = Object.assign({}, ws["!cols"][idx], {wch});
+    });
+    // cells
+    console.log(ws['A1']);
     return ws;
 }
 

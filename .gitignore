@@ -4,6 +4,7 @@
 
 # Project
 *.xlsb
+*.xlsx
 
 # Logs
 logs

@@ -35,7 +35,7 @@ function readServer(ws, row) {
 }
 
 function readEnv(ws, row) {
-    const envLabel = ws.getCell('C' + row).value;
+    const envLabel = readCellStr(ws,'C' + row);
     switch (envLabel) {
         case "Production":
             return 'prod';
@@ -49,7 +49,7 @@ function readEnv(ws, row) {
 
 
 function readAppName(ws, row) {
-    return ws.getCell('B' + row).value;
+    return readCellStr(ws,'B' + row);
 }
 
 

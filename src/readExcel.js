@@ -1,24 +1,77 @@
 'use strict';
+const fs = require('fs');
 const Excel = require('exceljs');
 
 
+function convetStringAsArray(str) {
+    if (!str) return undefined;
+    return str.split(/,|\/|\r?\n|\s/).filter(value => {
+        return value && value.trim().length > 0;
+    });
+}
 
-function readExcelLine(worksheet, row) {
-    const line = {
-            [worksheet.getCell('A' + row).value]: {
-                [worksheet.getCell('B' + row).value]: {
-                    server: worksheet.getCell('C' + row).value
-                }
-            }
-        }
+function readCellStr(ws, cell) {
+    let val = ws.getCell(cell).value;
+    return val;
+}
+
+function readMaven(ws, row) {
+    const groupId = readCellStr(ws, 'F' + row);
+    const artifactId = readCellStr(ws, 'G' + row);
+    if (groupId && artifactId) {
+        return {maven: {groupId, artifactId}}
+    }
+}
+
+function readServer(ws, row) {
+    let lan = convetStringAsArray(ws.getCell('D' + row).value);
+    let dmz = convetStringAsArray(ws.getCell('E' + row).value);
+    if (lan || dmz) {
+        return {lan, dmz};
+    }
+}
+
+function readEnv(ws, row) {
+    const envLabel = ws.getCell('C' + row).value;
+    switch (envLabel) {
+        case "Production":
+            return 'prod';
+        case "Recette":
+            return 'rec';
+        case "Qualif":
+            return 'qa';
+    }
+    return envLabel;
+}
+
+
+function readAppName(ws, row) {
+    return ws.getCell('B' + row).value;
+}
+
+
+function readExcelLine(ws, row) {
+    const name = readAppName(ws, row);
+    const maven = readMaven(ws, row);
+    const env = readEnv(ws, row);
+    const servers = readServer(ws, row);
+
+    console.log(name, env, servers);
+    let line = { [name]: {} };
+    if (maven) {
+        line[name].maven = maven;
+    }
+    line[name][env]= {servers};
+
+
     return line;
 }
 
 function mergeApp(apps, line) {
-    return Object.entries(line).reduce( (acc, [name, data])=> {
-        acc[name] = Object.assign({}, acc[name] , data);
+    return Object.entries(line).reduce((acc, [name, data]) => {
+        acc[name] = Object.assign({}, acc[name], data);
         return acc;
-    }, apps );
+    }, apps);
     return apps;
 }
 
@@ -28,8 +81,8 @@ function readWorksheet(worksheet) {
     for (let row = 2; row <= maxRow; row++) {
         const line = readExcelLine(worksheet, row);
         apps = mergeApp(apps, line);
-        console.log(apps);
     }
+    return apps;
 }
 
 
@@ -37,7 +90,9 @@ function main(filename) {
     const workbook = new Excel.Workbook();
     workbook.xlsx.readFile(filename).then(() => {
         const worksheet = workbook.getWorksheet(1);
-        readWorksheet(worksheet);
+        const apps = readWorksheet(worksheet);
+        console.log(JSON.stringify(apps, null, 2));
+        fs.writeFile("dory.json", JSON.stringify(apps, undefined, 2));
     });
 }
 

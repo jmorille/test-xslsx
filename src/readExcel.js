@@ -99,7 +99,9 @@ function main(filename) {
         const worksheet = workbook.getWorksheet(1);
         const apps = readWorksheet(worksheet);
         console.log(JSON.stringify(apps, null, 2));
-        fs.writeFile("dory.json", JSON.stringify(apps, undefined, 2));
+        fs.writeFile("dory.json", JSON.stringify(apps, undefined, 2), () => {
+            console.log("File is write for ", Object.keys(apps));
+        });
     });
 }
 

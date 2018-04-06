@@ -95,15 +95,22 @@ function readWorksheet(worksheet) {
 
 function main(filename) {
     const workbook = new Excel.Workbook();
-    workbook.xlsx.readFile(filename).then(() => {
-        const worksheet = workbook.getWorksheet(1);
-        const apps = readWorksheet(worksheet);
-        console.log(JSON.stringify(apps, null, 2));
-        fs.writeFile("dory.json", JSON.stringify(apps, undefined, 2), () => {
-            console.log("File is write for ", Object.keys(apps));
+    workbook.xlsx.readFile(filename).then((wb) => {
+        const worksheet = wb.getWorksheet(1);
+        return  readWorksheet(worksheet);
+    }).then(data => {
+        return new Promise((resolve, reject) => {
+            fs.writeFile("dory.json", JSON.stringify(data, undefined, 2), (err) => {
+                if (err) reject(err);
+                else resolve(data);
+            });
         });
+    }).then(apps => {
+        // Print result
+        console.log(JSON.stringify(apps, null, 2));
+        return apps;
     });
 }
 
 
-main('app.xlsx');
+const apps = main('app.xlsx');

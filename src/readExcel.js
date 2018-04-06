@@ -5,13 +5,16 @@ const Excel = require('exceljs');
 
 function convetStringAsArray(str) {
     if (!str) return undefined;
-    return str.split(/,|\/|\r?\n|\s/).filter(value => {
+    return str.split(/,|\/|\r?\n|\s|\t/).filter(value => {
         return value && value.trim().length > 0;
     });
 }
 
 function readCellStr(ws, cell) {
     let val = ws.getCell(cell).value;
+    if (val) {
+        val = val.trim();
+    }
     return val;
 }
 

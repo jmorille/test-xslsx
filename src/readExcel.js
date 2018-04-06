@@ -52,11 +52,13 @@ function readAppName(ws, row) {
 
 function readExcelLine(ws, row) {
     const name = readAppName(ws, row);
-    const maven = readMaven(ws, row);
     const env = readEnv(ws, row);
+    // test read
+    if (!env || (env === 'usine')) return undefined;
+    // Read dats
+    const maven = readMaven(ws, row);
     const servers = readServer(ws, row);
-
-    console.log(name, env, servers);
+    // Line Structure
     let line = { [name]: {} };
     if (maven) {
         line[name].maven = maven;
@@ -69,7 +71,9 @@ function readExcelLine(ws, row) {
 
 function mergeApp(apps, line) {
     return Object.entries(line).reduce((acc, [name, data]) => {
-        acc[name] = Object.assign({}, acc[name], data);
+        if (data) {
+            acc[name] = Object.assign({}, acc[name], data);
+        }
         return acc;
     }, apps);
     return apps;
